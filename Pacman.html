@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pac-Man Game</title>
+
+  <!-- Link the external CSS file -->
+  <link rel="stylesheet" href="styles.css">
+</head>
+<canvas id="myCanvas" width="400" height="300" style="border:1px solid;"></canvas>
+<br>
+<p>X:</p>
+<p id="x_value">--</p>
+<p>Y:</p>
+<p id="y_value">--</p>
+<p>score:</p>
+<p id="score">--</p>
+<p>lives:</p>
+<p id="lives">--</p>
+<script>
+  //-----------------------------------------------------
+  function keyDownEventHandler() {
+    // Handle key presses and set the direction accordingly
+    if (event.keyCode == 40)
+      direction = "down";
+    if (event.keyCode == 38)
+      direction = "up";
+    if (event.keyCode == 37)
+      direction = "left";
+    if (event.keyCode == 39)
+      direction = "right";
+  }
+
+  function TimeEventHandler() {
+    // Clear the canvas
+    ctx.fillStyle = 'white';
+    ctx.fillRect(0, 0, 400, 300);
+    for (var i = 0; i < chasers.length; i++) {
+      if (player_x == chasers[i].x && player_y == chasers[i].y) {
+        score -= 20;
+      }
+    }
+
+    for (var j= 0; j < bricks.length; j++) {
+      if (player_x == bricks[j].x - 20 && direction == "right" && player_y == bricks[j].y || player_x == bricks[j].x + 20 &&
+        direction == "left" && player_y == bricks[j].y || player_y == bricks[j].y - 20 && direction == "down" && player_x == bricks[j].x || player_y == bricks[j].y + 20 &&
+        direction == "up" && player_x == bricks[j].x) {
+        direction = "stop"
+        lives--;
+      }
+    }
+
+
+
+    // Update player position based on direction
+    if (direction == "right")
+      player_x += 20;
+    if (player_x > 380)
+      player_x = 0;
+    if (direction == "left")
+      player_x -= 20;
+    if (player_x < 0)
+      player_x = 380;
+    if (direction == "down")
+      player_y += 20;
+    if (player_x > 380)
+      player_y = 0;
+    if (direction == "up")
+      player_y -= 20;
+    if (player_y < 0)
+      player_y = 380;
+
+
+
+    if (lives == 0) {
+      losses++;
+      window.alert("Game over! Wins: " + wins + ", Losses: " + losses + "\nYour Score: " + score);
+    } else if (score >= 100) {
+      wins++;
+      window.alert("Congratulations! Wins: " + wins + ", Losses: " + losses + "\nYour Score: " + score);
+    }
+
+
+
+    // Update displayed information
+    document.getElementById("x_value").innerHTML = player_x;
+    document.getElementById("y_value").innerHTML = player_y;
+    document.getElementById("score").innerHTML = score;
+    document.getElementById("lives").innerHTML = lives;
+
+    // Draw player, apples, chasers, and bricks on the canvas
+    ctx.drawImage(pacmam_img, player_x, player_y, 20, 20);
+
+
+    // Check for collision with an apple and update score
+
+    for (var i = 0; i < apples.length; i++) {
+      ctx.drawImage(apple_img, apples[i].x, apples[i].y, 20, 20);
+      if (player_x == apples[i].x && player_y == apples[i].y)
+        apples[i].x = Math.floor(Math.random() * 15) * 20, apples[i].y = Math.floor(Math.random() * 15) * 20, score += 10;
+      for (var j = 0; j < bricks.length; j++) {
+        if (apples[i].x == bricks[j].x && apples[i].y == bricks[j].y)
+          apples[i].x = Math.floor(Math.random() * 15) * 20, apples[i].y = Math.floor(Math.random() * 15);
+      }
+    }
+
+    ctx.fillStyle = "yellow";
+    for (var i = 0; i < chasers.length; i++)
+      ctx.fillRect(chasers[i].x, chasers[i].y, 20, 20);
+
+    ctx.fillStyle = "blue"
+    for (var i = 0; i < bricks.length; i++)
+      ctx.fillRect(bricks[i].x, bricks[i].y, 20, 20);
+    apple_img.src = "צילום מסך 2023-12-27 133754.png";
+    pacmam_img.src = "צילום מסך 2023-12-27 133247.png";
+    bomb_img.src = "צילום מסך 2023-12-27 133957.png"
+  }
+
+
+  function time_of_chaser() {
+    // Update all chasers' positions based on direction
+    for (var i = 0; i < chasers.length; i++) {
+      if (direction == "right" && chasers[i].y != player_y || direction == "left" && chasers[i].y != player_y)
+        chasers[i].y -= 20;
+      if (direction == "right" && chasers[i].y == player_y || direction == "left" && chasers[i].y == player_y)
+        chasers[i].x -= 20;
+      if (direction == "up" && chasers[i].x != player_x || direction == "down" && chasers[i].x != player_x)
+        chasers[i].x -= 20;
+      if (direction == "up" && chasers[i].x == player_x || direction == "down" && chasers[i].x == player_x)
+        chasers[i].y -= 20;
+
+      // Handle chaser wrapping around the canvas
+      if (chasers[i].x > 380)
+        chasers[i].y = 0;
+      if (chasers[i].y > 380)
+        chasers[i].y = 0;
+      if (chasers[i].x < 0)
+        chasers[i].x = 380;
+      if (chasers[i].y < 0)
+        chasers[i].y = 380;
+    }
+  }
+
+
+
+  // function time_of_chaser() {
+  //   // Update chaser position based on direction
+  //   if (direction == "right" && chasers[0].y != player_y || direction == "left" && chasers[0].y != player_y)
+  //     chasers[0].y -= 20;
+  //   if (direction == "right" && chasers[0].y == player_y || direction == "left" && chasers[0].y == player_y)
+  //     chasers[0].x -= 20;
+  //   if (direction == "up" && chasers[0].x != player_x || direction == "down" && chasers[0].x != player_x)
+  //     chasers[0].x -= 20;
+  //   if (direction == "up" && chasers[0].x == player_x || direction == "down" && chasers[0].x == player_x)
+  //     chasers[0].y -= 20;
+
+  //   // Handle chaser wrapping around the canvas
+  //   if (chasers[0].x > 380)
+  //     chasers[0].y = 0;
+  //   if (chasers[0].y > 380)
+  //     chasers[0].y = 0;
+  //   if (chasers[0].x < 0)
+  //     chasers[0].x = 380;
+  //   if (chasers[0].y < 0)
+  //     chasers[0].y = 380;
+  // }
+  //-----------------------------------------------------
+  // Prompt the user for the number of lives
+  var lives = window.prompt("game Hard or Easy (10/5)? ");
+
+  // Get canvas context
+  ctx = document.getElementById('myCanvas').getContext('2d');
+
+  // Define the initial positions of game objects (bricks, chasers, apples)
+  chasers = new Array({ x: 120, y: 260 }, { x: 140, y: 200 });
+  apples = new Array({ x: 200, y: 120 }, { x: 180, y: 200 });
+
+  // Initialize player position, direction, score, and timing variables
+  var map = Array(
+    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+    1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
+    1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
+    1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1,
+    1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
+    1, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 1,
+    1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1,
+    1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 0, 0, 0, 0, 0, 1,
+    1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
+    1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1,
+    1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
+    1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
+    1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
+    1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
+    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1);
+  bricks = new Array();
+  map_x = 0;
+  map_y = 0;
+  for (var i = 0; i < map.length; i++) {
+    if (map[i] == 1) {
+      map_x = i % 20;
+      map_y = Math.floor(i / 20);
+      bricks.push({ x: map_x * 20, y: map_y * 20 });
+    }
+
+  }
+  var player_x = 100;
+  var player_y = 100;
+  var direction = "right";
+  var score = 0;
+  var time = 300;
+  var time_ahaser = 200;
+  var pacmam_img = new Image();
+  var apple_img = new Image();
+  var bomb_img = new Image();
+  var randomDirection;
+  var wins = 0;
+  var losses = 0;
+
+  // Set up the event handler for keydown
+  document.onkeydown = keyDownEventHandler;
+
+  // Set up intervals for game updates
+  setInterval(TimeEventHandler, time);
+  setInterval(time_of_chaser, time_ahaser);
+</script>
+
